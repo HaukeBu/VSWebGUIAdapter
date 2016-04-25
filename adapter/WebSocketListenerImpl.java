@@ -6,6 +6,8 @@ import java.util.concurrent.BlockingQueue;
 import io.cuckoo.websocket.nephila.WebSocket;
 import io.cuckoo.websocket.nephila.WebSocketException;
 import io.cuckoo.websocket.nephila.WebSocketListener;
+import logger.LogLevel;
+import logger.Logger;
 
 public class WebSocketListenerImpl implements WebSocketListener{
     private BlockingQueue<String> newMessages;
@@ -17,33 +19,33 @@ public class WebSocketListenerImpl implements WebSocketListener{
 
     @Override
     public void onConnect() {
-        System.out.println("connected to server");
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " connected to server ");
     }
 
     @Override
     public void onClose() {
-        System.out.println("disconnected from server");
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " disconnected from server");
     }
 
     @Override
     public void onMessage(String message) {
-        System.out.println("server has sent some text: " + message);
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server has sent some text: " + message);
         newMessages.add(message); 
     }
 
     @Override
     public void onMessage(byte[] message) {
-        System.out.println("server has sent some bytes: " + Arrays.toString(message));
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server has sent some bytes: " + Arrays.toString(message));
     }
 
     @Override
     public void onMessageChunk(String messageChunk, boolean isFinalChunk) {
-        System.out.println("server has sent a text chunk: " + messageChunk + " # final chunk: " + isFinalChunk);
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server has sent a text chunk: " + messageChunk + " # final chunk: " + isFinalChunk);
     }
 
     @Override
     public void onMessageChunk(byte[] messageChunk, boolean isFinalChunk) {
-        System.out.println("server has sent a binary chunk: " + Arrays.toString(messageChunk) + " # final chunk: " + isFinalChunk);
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server has sent a binary chunk: " + Arrays.toString(messageChunk) + " # final chunk: " + isFinalChunk);
     }
 
     @Override
@@ -62,12 +64,12 @@ public class WebSocketListenerImpl implements WebSocketListener{
 
     @Override
     public void onPong() {
-        System.out.println("server is still alive");
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server is still alive");
     }
 
     @Override
     public void onPong(byte[] data) {
-        System.out.println("server is still alive, data: " + Arrays.toString(data));
+        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + " server is still alive, data: " + Arrays.toString(data));
     }
 
     public void setWs(WebSocket ws) {

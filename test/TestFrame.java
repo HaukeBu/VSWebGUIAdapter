@@ -16,7 +16,7 @@ public class TestFrame implements IIDLCaDSEV3RMIMoveGrapper, IIDLCaDSEV3RMIMoveH
     public static void main(String[] args) {
         TestFrame bla = new TestFrame();
          try {
-            WebGUI.startGUI(bla, bla, bla, bla,"141.22.95.241", 3000);
+            WebGUI.startGUI(bla, bla, bla, bla,"141.22.95.241", 3000, true);
         } catch (WebSocketException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

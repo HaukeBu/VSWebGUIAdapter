@@ -1,26 +1,23 @@
 package adapter;
 
-import java.util.Arrays;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
-import org.cads.ev3.gui.ICaDSGUIUpdater;
 import org.cads.ev3.rmi.ICaDSRMIConsumer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+
 import cadSRMIInterface.IIDLCaDSEV3RMIMoveGrapper;
 import cadSRMIInterface.IIDLCaDSEV3RMIMoveHorizontal;
 import cadSRMIInterface.IIDLCaDSEV3RMIMoveVertical;
 import io.cuckoo.websocket.nephila.WebSocket;
-import io.cuckoo.websocket.nephila.WebSocketConfig;
 import io.cuckoo.websocket.nephila.WebSocketException;
-import io.cuckoo.websocket.nephila.WebSocketListener;
 import io.cuckoo.websocket.nephila.impl.DefaultWebSocket;
+import logger.LogLevel;
+import logger.Logger;
 
 public class WebGUI implements Runnable{
 
@@ -53,18 +50,19 @@ public class WebGUI implements Runnable{
         sendAllServices();
     }
 
-    public static void startGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, String ip, int port) throws WebSocketException {
+    public static void startGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, String ip, int port, boolean activateLogger) throws WebSocketException {
         WebGUI gui = new WebGUI(moveGrap, moveHorizontal, moveVertical, consumer, ip, port);
         Thread thread = new Thread(gui);
         thread.setName(gui.getClass().getSimpleName() + "-Thread");
-        thread.setDaemon(false);
         thread.start();
+        
+        Logger.init(LogLevel.DEBUG);
         
         try {
             thread.join();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            Logger.log(LogLevel.DEBUG, gui.getClass().getSimpleName() + "join() was interrupted.");
         }
     }
 
@@ -74,8 +72,8 @@ public class WebGUI implements Runnable{
             try {
                 processInputString(newMessages.take());
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
+                Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "take() was interrupted.");
             }
         }
     }
@@ -85,8 +83,8 @@ public class WebGUI implements Runnable{
         try {
             jsonObj = (JSONObject) new JSONParser().parse(webSocketInput);
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "parse() failed. webSocketInput: " + webSocketInput);
         }
 
         if (jsonObj != null) {
@@ -101,8 +99,8 @@ public class WebGUI implements Runnable{
                         consumer.update(service);
                         moveGrap.openIT(transactionNumber++);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
                     
@@ -112,8 +110,8 @@ public class WebGUI implements Runnable{
                         consumer.update(service);
                         moveGrap.closeIT(transactionNumber++);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
                     
@@ -124,8 +122,8 @@ public class WebGUI implements Runnable{
                         consumer.update(service);
                         moveVertical.moveVerticalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
                     
@@ -136,8 +134,8 @@ public class WebGUI implements Runnable{
                         consumer.update(service);
                         moveHorizontal.moveMoveHorizontalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
                     
@@ -148,8 +146,8 @@ public class WebGUI implements Runnable{
                         moveHorizontal.stop(transactionNumber++);
                         moveVertical.stop(transactionNumber++);
                     } catch (Exception e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
+                        Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
                     
@@ -159,11 +157,12 @@ public class WebGUI implements Runnable{
                     break;
                     
                 default :
-                    System.out.println("default--- Fall");
+                    Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "processInputString - default:  string: " + webSocketInput);
             }
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void sendAllServices() {
         JSONObject allServices = new JSONObject();
         JSONArray array = new JSONArray();
@@ -179,7 +178,8 @@ public class WebGUI implements Runnable{
         try {
             ws.send(allServices.toJSONString() + "\n");
         } catch (WebSocketException e) {
-            
+            e.printStackTrace();
+            Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "sendAllServices - failed ");
         }
     }
 }
