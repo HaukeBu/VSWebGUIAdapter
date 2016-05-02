@@ -29,6 +29,7 @@ public class WebGUI implements Runnable{
     private final WebSocket ws;
     private final BlockingQueue<String> newMessages;
     private int transactionNumber;
+    private String identifier;
 
     public WebGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, String ip, int port) throws WebSocketException {
         this.moveGrap = moveGrap;
@@ -45,8 +46,11 @@ public class WebGUI implements Runnable{
         
         ws.connect("ws://" + ip + ":" + port);
         
+        identifier = "noIdentifier";
+        
         consumer.register(guiUpdater);
 
+        registerAdapter();
         sendAllServices();
     }
 
@@ -92,6 +96,8 @@ public class WebGUI implements Runnable{
             String service = "";
             int value = 0;
 
+            System.out.println(this.getClass().getSimpleName() + "-  InputMessage: " + webSocketInput);
+            
             switch (type) {
                 case "openIT":
                     service = (String) jsonObj.get("service");
@@ -155,6 +161,11 @@ public class WebGUI implements Runnable{
                     sendAllServices();
 
                     break;
+               
+                case "init":
+                    System.out.println("init");
+                    identifier = jsonObj.get("identifier").toString();
+                    Logger.log(LogLevel.SYSTEM, "WebGUI: 6-digit identifier: " + identifier);
                     
                 default :
                     Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "processInputString - default:  string: " + webSocketInput);
@@ -168,12 +179,28 @@ public class WebGUI implements Runnable{
         JSONArray array = new JSONArray();
         
         allServices.put("type", "allServices");
+        allServices.put("identifier", identifier);
         
         for(String context: guiUpdater.getContextSet()) {
             array.add(context);
         }
         
         allServices.put("services", array);
+        
+        try {
+            ws.send(allServices.toJSONString() + "\n");
+        } catch (WebSocketException e) {
+            e.printStackTrace();
+            Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "sendAllServices - failed ");
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void registerAdapter() {
+        JSONObject allServices = new JSONObject();
+        JSONArray array = new JSONArray();
+        
+        allServices.put("type", "init");
         
         try {
             ws.send(allServices.toJSONString() + "\n");

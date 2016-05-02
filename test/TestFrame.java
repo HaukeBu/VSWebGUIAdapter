@@ -9,16 +9,19 @@ import cadSRMIInterface.IIDLCaDSEV3RMIMoveGrapper;
 import cadSRMIInterface.IIDLCaDSEV3RMIMoveHorizontal;
 import cadSRMIInterface.IIDLCaDSEV3RMIMoveVertical;
 import io.cuckoo.websocket.nephila.WebSocketException;
+import logger.LogLevel;
+import logger.Logger;
 
 public class TestFrame implements IIDLCaDSEV3RMIMoveGrapper, IIDLCaDSEV3RMIMoveHorizontal, IIDLCaDSEV3RMIMoveVertical, ICaDSRMIConsumer {
 
     @Test
     public static void main(String[] args) {
+        Logger.init(LogLevel.DEBUG);
+        
         TestFrame bla = new TestFrame();
          try {
-            WebGUI.startGUI(bla, bla, bla, bla,"141.22.95.241", 3000, true);
+            WebGUI.startGUI(bla, bla, bla, bla,"141.22.75.216", 3000, true);
         } catch (WebSocketException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

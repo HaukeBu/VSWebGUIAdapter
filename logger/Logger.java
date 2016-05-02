@@ -2,8 +2,8 @@ package logger;
 
 public class Logger {
 
-    private static LogLevel logLevel;
-    private static boolean enabled;
+    private static LogLevel logLevel = LogLevel.DEBUG;
+    private static boolean enabled = true;
 
     public static void log(LogLevel messageLogLevel, String logMessage) {
 
@@ -11,7 +11,7 @@ public class Logger {
             for (int i = 0; i < messageLogLevel.ordinal(); i++) {
                 System.out.print("\t");
             }
-            System.out.printf("[<%s> \t-> message: %s] ", messageLogLevel.name(), logMessage);
+            System.out.printf("[<%s> \t-> message: %s] \n", messageLogLevel.name(), logMessage);
         }
     }
 
