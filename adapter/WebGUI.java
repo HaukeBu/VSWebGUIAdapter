@@ -31,37 +31,37 @@ public class WebGUI implements Runnable{
     private int transactionNumber;
     private String identifier;
 
-    public WebGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, String ip, int port) throws WebSocketException {
+    public WebGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer) throws WebSocketException {
         this.moveGrap = moveGrap;
         this.moveHorizontal = moveHorizontal;
         this.moveVertical = moveVertical;
         this.consumer = consumer;
         transactionNumber = 0;
-        
+
         newMessages = new ArrayBlockingQueue<String>(1000);
         guiUpdater = new CaDSGUIUpdater();
         WebSocketListenerImpl wsl = new WebSocketListenerImpl(newMessages);
         ws = new DefaultWebSocket(wsl);
         wsl.setWs(ws);
-        
-        ws.connect("ws://" + ip + ":" + port);
-        
+
+        ws.connect("ws://xmas2014.3t0.de:1717/");
+
         identifier = "noIdentifier";
-        
+
         consumer.register(guiUpdater);
 
         registerAdapter();
         sendAllServices();
     }
 
-    public static void startGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, String ip, int port, boolean activateLogger) throws WebSocketException {
-        WebGUI gui = new WebGUI(moveGrap, moveHorizontal, moveVertical, consumer, ip, port);
+    public static void startGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer, boolean activateLogger) throws WebSocketException {
+        WebGUI gui = new WebGUI(moveGrap, moveHorizontal, moveVertical, consumer);
         Thread thread = new Thread(gui);
         thread.setName(gui.getClass().getSimpleName() + "-Thread");
         thread.start();
-        
+
         Logger.init(LogLevel.DEBUG);
-        
+
         try {
             thread.join();
         } catch (InterruptedException e) {
@@ -97,7 +97,7 @@ public class WebGUI implements Runnable{
             int value = 0;
 
             System.out.println(this.getClass().getSimpleName() + "-  InputMessage: " + webSocketInput);
-            
+
             switch (type) {
                 case "openIT":
                     service = (String) jsonObj.get("service");
@@ -109,7 +109,7 @@ public class WebGUI implements Runnable{
                         Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
-                    
+
                 case "closeIT":
                     service = (String) jsonObj.get("service");
                     try {
@@ -120,7 +120,7 @@ public class WebGUI implements Runnable{
                         Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
-                    
+
                 case "moveVerticalToPercent":
                     value = Integer.parseInt(jsonObj.get("percent").toString());
                     service = (String) jsonObj.get("service");
@@ -132,7 +132,7 @@ public class WebGUI implements Runnable{
                         Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
-                    
+
                 case "moveHorizontalToPercent":
                     value = Integer.parseInt(jsonObj.get("percent").toString());
                     service = (String) jsonObj.get("service");
@@ -144,7 +144,7 @@ public class WebGUI implements Runnable{
                         Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
-                    
+
                 case "stop":
                     service = (String) jsonObj.get("service");
                     try {
@@ -156,17 +156,17 @@ public class WebGUI implements Runnable{
                         Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "CaDS failed. webSocketInput: " + webSocketInput);
                     }
                     break;
-                    
-                case "request":                  
+
+                case "request":
                     sendAllServices();
 
                     break;
-               
+
                 case "init":
                     System.out.println("init");
                     identifier = jsonObj.get("identifier").toString();
                     Logger.log(LogLevel.SYSTEM, "WebGUI: 6-digit identifier: " + identifier);
-                    
+
                 default :
                     Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "processInputString - default:  string: " + webSocketInput);
             }
@@ -177,16 +177,16 @@ public class WebGUI implements Runnable{
     private void sendAllServices() {
         JSONObject allServices = new JSONObject();
         JSONArray array = new JSONArray();
-        
+
         allServices.put("type", "allServices");
         allServices.put("identifier", identifier);
-        
+
         for(String context: guiUpdater.getContextSet()) {
             array.add(context);
         }
-        
+
         allServices.put("services", array);
-        
+
         try {
             ws.send(allServices.toJSONString() + "\n");
         } catch (WebSocketException e) {
@@ -194,14 +194,14 @@ public class WebGUI implements Runnable{
             Logger.log(LogLevel.DEBUG, this.getClass().getSimpleName() + "sendAllServices - failed ");
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void registerAdapter() {
         JSONObject allServices = new JSONObject();
         JSONArray array = new JSONArray();
-        
+
         allServices.put("type", "init");
-        
+
         try {
             ws.send(allServices.toJSONString() + "\n");
         } catch (WebSocketException e) {
