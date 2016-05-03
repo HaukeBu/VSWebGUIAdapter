@@ -30,13 +30,15 @@ public class WebGUI implements Runnable{
     private final BlockingQueue<String> newMessages;
     private int transactionNumber;
     private String identifier;
-
+    private String lastService;
+    
     public WebGUI(IIDLCaDSEV3RMIMoveGrapper moveGrap, IIDLCaDSEV3RMIMoveHorizontal moveHorizontal, IIDLCaDSEV3RMIMoveVertical moveVertical, ICaDSRMIConsumer consumer) throws WebSocketException {
         this.moveGrap = moveGrap;
         this.moveHorizontal = moveHorizontal;
         this.moveVertical = moveVertical;
         this.consumer = consumer;
         transactionNumber = 0;
+        lastService = "";
 
         newMessages = new ArrayBlockingQueue<String>(1000);
         guiUpdater = new CaDSGUIUpdater();
@@ -102,7 +104,9 @@ public class WebGUI implements Runnable{
                 case "openIT":
                     service = (String) jsonObj.get("service");
                     try {
-                        consumer.update(service);
+                        if(! lastService.equals(service)){
+                            consumer.update(service);
+                        }
                         moveGrap.openIT(transactionNumber++);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -113,7 +117,9 @@ public class WebGUI implements Runnable{
                 case "closeIT":
                     service = (String) jsonObj.get("service");
                     try {
-                        consumer.update(service);
+                        if(! lastService.equals(service)){
+                            consumer.update(service);
+                        }
                         moveGrap.closeIT(transactionNumber++);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -125,7 +131,9 @@ public class WebGUI implements Runnable{
                     value = Integer.parseInt(jsonObj.get("percent").toString());
                     service = (String) jsonObj.get("service");
                     try {
-                        consumer.update(service);
+                        if(! lastService.equals(service)){
+                            consumer.update(service);
+                        }
                         moveVertical.moveVerticalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -137,7 +145,9 @@ public class WebGUI implements Runnable{
                     value = Integer.parseInt(jsonObj.get("percent").toString());
                     service = (String) jsonObj.get("service");
                     try {
-                        consumer.update(service);
+                        if(! lastService.equals(service)){
+                            consumer.update(service);
+                        }
                         moveHorizontal.moveMoveHorizontalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -148,7 +158,9 @@ public class WebGUI implements Runnable{
                 case "stop":
                     service = (String) jsonObj.get("service");
                     try {
-                        consumer.update(service);
+                        if(! lastService.equals(service)){
+                            consumer.update(service);
+                        }
                         moveHorizontal.stop(transactionNumber++);
                         moveVertical.stop(transactionNumber++);
                     } catch (Exception e) {

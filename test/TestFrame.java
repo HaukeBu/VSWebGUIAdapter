@@ -20,7 +20,7 @@ public class TestFrame implements IIDLCaDSEV3RMIMoveGrapper, IIDLCaDSEV3RMIMoveH
         
         TestFrame bla = new TestFrame();
          try {
-            WebGUI.startGUI(bla, bla, bla, bla,"141.22.75.216", 3000, true);
+            WebGUI.startGUI(bla, bla, bla, bla, true);
         } catch (WebSocketException e) {
             e.printStackTrace();
         }
