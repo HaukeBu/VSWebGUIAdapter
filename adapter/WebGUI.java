@@ -106,6 +106,7 @@ public class WebGUI implements Runnable{
                     try {
                         if(! lastService.equals(service)){
                             consumer.update(service);
+                            lastService = service;
                         }
                         moveGrap.openIT(transactionNumber++);
                     } catch (Exception e) {
@@ -119,6 +120,7 @@ public class WebGUI implements Runnable{
                     try {
                         if(! lastService.equals(service)){
                             consumer.update(service);
+                            lastService = service;
                         }
                         moveGrap.closeIT(transactionNumber++);
                     } catch (Exception e) {
@@ -133,6 +135,7 @@ public class WebGUI implements Runnable{
                     try {
                         if(! lastService.equals(service)){
                             consumer.update(service);
+                            lastService = service;
                         }
                         moveVertical.moveVerticalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
@@ -147,6 +150,7 @@ public class WebGUI implements Runnable{
                     try {
                         if(! lastService.equals(service)){
                             consumer.update(service);
+                            lastService = service;
                         }
                         moveHorizontal.moveMoveHorizontalToPercent(transactionNumber++, value);
                     } catch (Exception e) {
@@ -160,6 +164,7 @@ public class WebGUI implements Runnable{
                     try {
                         if(! lastService.equals(service)){
                             consumer.update(service);
+                            lastService = service;
                         }
                         moveHorizontal.stop(transactionNumber++);
                         moveVertical.stop(transactionNumber++);
